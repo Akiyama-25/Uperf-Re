@@ -2,8 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
   <title>Uperf-Re 控制面板</title>
+  <script>
+    // KernelSU WebView 会向 /internal/insets.css 注入系统状态栏与手势条安全区尺寸变量，
+    // 请求该样式表还会通知宿主 Activity 开启 Edge-to-Edge 全面屏沉浸渲染。
+    if (window.ksu) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/internal/insets.css";
+      document.head.appendChild(link);
+    }
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
