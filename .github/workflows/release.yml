@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: '发布版本标签 (例如 v1.51，留空则自动读取 module.prop 中的 version)'
+        description: '发布版本标签 (例如 release-1，留空则自动读取 module.prop 中的 version)'
         required: false
-        default: ''
+        default: 'release-1'
       release_title:
         description: 'Release 标题 (留空则默认为 "Uperf-Re <版本号>")'
         required: false
-        default: ''
+        default: 'Uperf-Re release-1'
       release_notes:
         description: '版本更新说明与日志'
         required: false
-        default: 'Uperf-Re 最新版本发布'
+        default: 'Uperf-Re release-1 发布：搭载 Material 3 Expressive 风格 WebUI、Scene 级可视化分应用调度、伴生管理 App 与全面屏沉浸式支持。'
 
 permissions:
   contents: write
@@ -35,20 +35,11 @@ jobs:
           RAW_TAG="${{ github.event.inputs.tag_name }}"
           RAW_TITLE="${{ github.event.inputs.release_title }}"
           PROP_VER=$(grep -E '^version=' module.prop | cut -d'=' -f2 | tr -d ' \r\n')
-          PROP_VER=${PROP_VER:-"v1.51"}
+          PROP_VER=${PROP_VER:-"release-1"}
 
           # 规范化并清洗 Git Tag
           if [ -n "$RAW_TAG" ]; then
-            EXTRACTED=$(echo "$RAW_TAG" | grep -oE 'v?[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.]+)?' | head -n1)
-            if [ -n "$EXTRACTED" ]; then
-              if [[ "$EXTRACTED" =~ ^[0-9] ]]; then
-                CLEAN_TAG="v${EXTRACTED}"
-              else
-                CLEAN_TAG="${EXTRACTED}"
-              fi
-            else
-              CLEAN_TAG=$(echo "$RAW_TAG" | tr -s ' ' '-' | tr -cd 'a-zA-Z0-9._-')
-            fi
+            CLEAN_TAG=$(echo "$RAW_TAG" | tr -s ' ' '-' | tr -cd 'a-zA-Z0-9._-')
           else
             CLEAN_TAG="${PROP_VER}"
           fi
@@ -60,8 +51,6 @@ jobs:
           # 规范化 Release Title
           if [ -n "$RAW_TITLE" ]; then
             TITLE="$RAW_TITLE"
-          elif [ -n "$RAW_TAG" ] && [ "$RAW_TAG" != "$CLEAN_TAG" ]; then
-            TITLE="$RAW_TAG"
           else
             TITLE="Uperf-Re ${CLEAN_TAG}"
           fi
@@ -91,7 +80,7 @@ jobs:
           cat <<EOF > update.json
           {
             "version": "${TAG}",
-            "versionCode": ${VER_CODE:-260422},
+            "versionCode": ${VER_CODE:-10001},
             "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${TAG}/Uperf-Re-${TAG}.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/master/changelog.md"
           }
@@ -99,8 +88,8 @@ jobs:
           cp update.json magisk/update.json
           cat <<EOF > version.json
           {
-            "version": "${TAG#v}",
-            "versionCode": ${VER_CODE:-260422},
+            "version": "${TAG}",
+            "versionCode": ${VER_CODE:-10001},
             "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${TAG}/Uperf-Re-${TAG}.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/master/changelog.md"
           }

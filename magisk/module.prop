@@ -1,8 +1,8 @@
 id=uperf
 name=Uperf-Re
-version=v1.51
-versionCode=260422
-author=Matt Yang (吟惋兮 & Akari)
-description=用户态性能控制器，搭载 KernelSU 极简 WebUI，支持运行模式调节、硬件数据监控与核心参数自定义。
+version=release-1
+versionCode=10001
+author=迷人の爱音 (原作者: Matt Yang, 吟惋兮)
+description=用户态性能控制器，搭载 Material 3 Expressive 风格 WebUI 与伴生管理应用，支持可视化分应用调度、硬件状态监控与核心调参。
 updateJson=https://raw.githubusercontent.com/Akiyama-25/Uperf-Re/master/update.json
 ASOPT_VERSIONCODE=260

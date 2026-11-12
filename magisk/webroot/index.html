@@ -21,7 +21,7 @@
   <header>
     <div class="title-group">
       <h1>Uperf-Re</h1>
-      <p>KernelSU 控制面板</p>
+      <p id="subTitle">release-1 · 迷人の爱音 (原作者: Matt Yang, 吟惋兮)</p>
     </div>
     <span id="headerModeBadge" class="badge">未知模式</span>
   </header>
@@ -29,8 +29,9 @@
   <div id="msgBox" class="message-box"></div>
 
   <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="tab-monitor">状态与监控</button>
-    <button class="tab-btn" data-tab="tab-config">参数配置</button>
+    <button class="tab-btn active" data-tab="tab-monitor">状态监控</button>
+    <button class="tab-btn" data-tab="tab-perapp">分应用调度</button>
+    <button class="tab-btn" data-tab="tab-config">核心调优</button>
   </nav>
 
   <!-- 选项卡 1: 状态与监控 -->
@@ -74,8 +75,8 @@
     <section class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div class="card-title" style="margin-bottom: 0;">硬件监控</div>
-        <label style="font-size: 12px; color: #8b949e; display: flex; align-items: center; gap: 6px;">
-          <input type="checkbox" id="chkAutoRefresh" checked style="accent-color: #2563eb;">
+        <label style="font-size: 12px; color: var(--m3e-text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="checkbox" id="chkAutoRefresh" checked style="accent-color: var(--m3e-primary);">
           自动刷新 (2s)
         </label>
       </div>
@@ -98,7 +99,7 @@
         </div>
       </div>
 
-      <div style="margin-top: 12px;">
+      <div style="margin-top: 14px;">
         <div class="stat-label">CPU 实时频率</div>
         <div id="cpuFreqList" class="cpu-freq-list">
           <div class="cpu-freq-item">
@@ -110,22 +111,81 @@
     </section>
   </main>
 
-  <!-- 选项卡 2: 参数配置 -->
-  <main id="tab-config" class="tab-pane">
-    <!-- 分应用配置 -->
+  <!-- 选项卡 2: 分应用调度 (Scene 风格可视化) -->
+  <main id="tab-perapp" class="tab-pane">
+    <!-- 全局基准规则 -->
     <section class="card">
-      <div class="card-title">分应用配置 (perapp_powermode.txt)</div>
-      <div class="form-group">
-        <label class="form-label">规则列表 (* 为默认，- 为熄屏)</label>
-        <textarea id="txtPerApp" class="form-textarea" placeholder="包名 模式&#10;com.example.app fast&#10;* balance&#10;- powersave"></textarea>
-      </div>
-      <div class="action-row">
-        <button id="btnReloadPerApp" class="btn btn-secondary">重新载入</button>
-        <button id="btnSavePerApp" class="btn btn-primary">保存规则</button>
+      <div class="card-title">全局基准策略</div>
+      <div class="card-subtitle">控制未单独指定规则的应用以及设备熄屏时的调度行为</div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-label">未配置应用全局默认 (*)</div>
+          <select id="selDefaultMode" class="form-select" style="margin-top: 6px;">
+            <option value="powersave">省电 (powersave)</option>
+            <option value="balance" selected>均衡 (balance)</option>
+            <option value="performance">性能 (performance)</option>
+            <option value="fast">极速 (fast)</option>
+            <option value="auto">自动 (auto)</option>
+          </select>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">熄屏待机策略 (-)</div>
+          <select id="selOffscreenMode" class="form-select" style="margin-top: 6px;">
+            <option value="powersave" selected>省电 (powersave)</option>
+            <option value="balance">均衡 (balance)</option>
+            <option value="performance">性能 (performance)</option>
+            <option value="fast">极速 (fast)</option>
+            <option value="auto">自动 (auto)</option>
+          </select>
+        </div>
       </div>
     </section>
 
-    <!-- 关键调优参数 -->
+    <!-- 应用可视化调度管理 -->
+    <section class="card">
+      <div class="card-title">
+        <span>应用性能配置</span>
+        <span id="appSummaryBadge" style="font-size: 12px; font-weight: normal; color: var(--m3e-text-muted);">扫描中...</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="appSearchInput" class="form-input" placeholder="搜索应用中文名或包名...">
+      </div>
+
+      <div class="chip-bar">
+        <button class="filter-chip active" data-filter="all">全部 (<span id="countAll">0</span>)</button>
+        <button class="filter-chip" data-filter="configured">已配置 (<span id="countConfigured">0</span>)</button>
+        <button class="filter-chip" data-filter="game">游戏 (<span id="countGame">0</span>)</button>
+        <button class="filter-chip" data-filter="app">应用 (<span id="countApp">0</span>)</button>
+      </div>
+
+      <div id="appListContainer" class="app-list">
+        <div style="text-align: center; padding: 24px 0; color: var(--m3e-text-muted);">正在扫描系统已装应用...</div>
+      </div>
+
+      <div class="action-row" style="margin-top: 14px;">
+        <button id="btnRescanApps" class="btn btn-secondary">重新扫描应用</button>
+        <button id="btnSavePerAppRules" class="btn btn-primary">保存并生效配置</button>
+      </div>
+    </section>
+
+    <!-- 原始配置文件查看与编辑 -->
+    <section class="card">
+      <div class="card-title">原始规则文本 (perapp_powermode.txt)</div>
+      <div class="card-subtitle">高级用户可直接查阅或编辑规则文件，支持标准语法</div>
+      <div class="form-group">
+        <textarea id="txtPerApp" class="form-textarea" placeholder="包名 模式&#10;com.example.app fast&#10;* balance&#10;- powersave"></textarea>
+      </div>
+      <div class="action-row">
+        <button id="btnReloadPerAppRaw" class="btn btn-secondary">重载文本</button>
+        <button id="btnSavePerAppRaw" class="btn btn-primary">保存文本规则</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 选项卡 3: 核心调优 -->
+  <main id="tab-config" class="tab-pane">
+    <!-- 核心调优参数 -->
     <section class="card">
       <div class="card-title">核心参数调节 (uperf.json)</div>
       <div class="form-group">

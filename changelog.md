@@ -1,23 +1,22 @@
 # 更新日志
 
-## Uperf-Game-Turbo1.51
+## release-1
 
 【更新内容】
 
-    ✅ 适配了更多处理器
-    ✅ 调整处理器识别
-    ✅ 调整各模式功耗和性能
-    ✅ 修复偶发性卡顿bug
-    ✅ 调整功耗模型
-    ✅ 调整并重写处理器识别
-    ✅ 更新内置asoul版本
-
-【Update Details】
-
-    ✅  Adapted to more processors
-    ✅  Adjusted processor identification
-    ✅  Adjusted power consumption and performance in various modes
-    ✅  Fixed occasional stuttering bugs
-    ✅  Adjusted power consumption model
-    ✅  Adjusted and rewrote processor identification
-    ✅  Updated built-in Asoul version
+- 元数据更新: 明确标注原作者 (原作者: Matt Yang, 吟惋兮)，独立呈现当前作者 (迷人の爱音)，版本升级为 release-1。
+- Material 3 Expressive 界面重构:
+  - 严格遵循 Material 3 Expressive 规范，采用纯净暗色色彩色阶。
+  - 彻底去除全站描边与投射阴影，消除冗余 Emoji 图标污染，采用标准胶囊分段按键与清晰文本标签。
+  - 全面引入 Edge-to-Edge 沉浸式全面屏适配，注入系统安全区变量避让顶部状态栏与底部手势条。
+- Scene 风格可视化分应用调度:
+  - 新增专用分应用配置标签页，自动检索已安装第三方应用 (pm list packages -3)。
+  - 内置常见日常应用与主流手游友好中文识别字典与游戏智能标记。
+  - 支持按中文名或包名即时搜索，支持“全部 / 已配置 / 游戏 / 应用”快速标签筛选。
+  - 卡片集成模式下拉选择器，修改即时生效并双向同步至原始规则文件 (perapp_powermode.txt)。
+  - 保留原始规则文本框供高级用户查阅与底层编辑。
+- 伴生管理应用集成:
+  - 模块内置轻量化伴生管理应用 (UperfManager.apk)，刷模块时同步静默安装。
+  - 支持模块免重启热更新 (hotinstall.sh) 与 WebUI 独立桌面运行。
+- GitHub Actions 自动化:
+  - 修复构建产物嵌套压缩包问题，直接输出纯净模块刷机包与规范 Release 资产。

@@ -3,7 +3,7 @@
 set -e
 
 VERSION=$(grep -E '^version=' module.prop | cut -d'=' -f2 | tr -d ' \r\n')
-VERSION=${VERSION:-"v1.51"}
+VERSION=${VERSION:-"release-1"}
 DIST_DIR="dist"
 PACKAGE_DIR="${DIST_DIR}/package"
 MODULE_ZIP="${DIST_DIR}/Uperf-Re-${VERSION}.zip"
@@ -15,7 +15,9 @@ if [ "$1" == "--test" ]; then
     for s in $(find magisk -name "*.sh"); do
         bash -n "$s"
     done
-    bash -n action.sh
+    [ -f action.sh ] && bash -n action.sh
+    [ -f hotinstall.sh ] && bash -n hotinstall.sh
+    [ -f customize.sh ] && bash -n customize.sh
     echo "[√] 所有 Shell 脚本静态语法检查通过！"
 fi
 
@@ -29,13 +31,16 @@ if [ "$1" == "--package" ] || [ "$1" == "" ]; then
     # 复制 magisk 目录下的所有模块文件至 package 目录
     cp -r magisk/* "${PACKAGE_DIR}/"
 
-    # 确保根目录补充的 webroot / action / update.json / webui.html 等文件被完整纳入
+    # 确保根目录补充的 webroot / action / update.json / webui.html / app 等文件被完整纳入
     cp -r webroot "${PACKAGE_DIR}/"
     [ -e action.sh ] && cp action.sh "${PACKAGE_DIR}/"
+    [ -e hotinstall.sh ] && cp hotinstall.sh "${PACKAGE_DIR}/"
+    [ -e customize.sh ] && cp customize.sh "${PACKAGE_DIR}/"
     [ -e webui.html ] && cp webui.html "${PACKAGE_DIR}/"
     [ -e update.json ] && cp update.json "${PACKAGE_DIR}/"
     [ -e version.json ] && cp version.json "${PACKAGE_DIR}/"
     [ -e module.prop ] && cp module.prop "${PACKAGE_DIR}/"
+    [ -d app ] && cp -r app "${PACKAGE_DIR}/"
 
     echo ">>> 3. 打包可刷入的 KernelSU / Magisk 模块压缩包..."
     python3 -c "

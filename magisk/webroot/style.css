@@ -1,5 +1,46 @@
+/* Uperf-Re - Material 3 Expressive (M3E) 纯净实机调优样式表 */
+/* 设计准则: 零描边、零投射阴影、纯净色阶区分、全面屏沉浸式适配、遵循 Android 15/16 原生 M3E 规范 */
+
 :root {
   color-scheme: dark;
+
+  /* 优先对接 KernelSU 动态莫奈取色 (/internal/colors.css)，无动态取色时采用深色自然系 */
+  --m3e-primary: var(--primary, #a8c7fa);
+  --m3e-on-primary: var(--onPrimary, #062e6f);
+  --m3e-primary-container: var(--primaryContainer, #264379);
+  --m3e-on-primary-container: var(--onPrimaryContainer, #d3e3fd);
+
+  --m3e-secondary: var(--secondary, #bec6dc);
+  --m3e-secondary-container: var(--secondaryContainer, #333a47);
+
+  /* 表面色阶层级 (依靠色阶亮度区分，彻底摒弃描边与阴影) */
+  --m3e-bg: var(--background, #0e0f14);
+  --m3e-surface: var(--surface, #14151c);
+  --m3e-surface-card: var(--surfaceContainer, #1a1b24);
+  --m3e-surface-block: var(--surfaceContainerHigh, #21232e);
+  --m3e-surface-highest: var(--surfaceContainerHighest, #2a2d3b);
+
+  --m3e-text-main: var(--onSurface, #f2f3f7);
+  --m3e-text-muted: var(--onSurfaceVariant, #a2a6b8);
+  --m3e-text-sub: var(--outline, #73778a);
+
+  /* 性能模式状态色阶 */
+  --m3e-powersave: #6eedaa;
+  --m3e-powersave-bg: #123824;
+  --m3e-balance: #a8c7fa;
+  --m3e-balance-bg: #264379;
+  --m3e-perf: #ffb37c;
+  --m3e-perf-bg: #442410;
+  --m3e-fast: #ffb4ab;
+  --m3e-fast-bg: #4f1816;
+  --m3e-auto: #d0bcff;
+  --m3e-auto-bg: #381e72;
+
+  --radius-card: 16px;
+  --radius-block: 12px;
+  --radius-pill: 9999px;
+
+  /* KernelSU `internal/insets.css` 注入变量，普通浏览器优雅回退 */
   --inset-top: var(--window-inset-top, env(safe-area-inset-top, 0px));
   --inset-bottom: var(--window-inset-bottom, env(safe-area-inset-bottom, 0px));
   --inset-left: var(--window-inset-left, env(safe-area-inset-left, 0px));
@@ -14,86 +55,92 @@
   outline: none !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
-  background-color: #121316;
+  background-color: var(--m3e-bg);
   min-height: 100%;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: #121316;
-  color: #e6edf3;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans CJK SC", sans-serif;
+  background-color: var(--m3e-bg);
+  color: var(--m3e-text-main);
   line-height: 1.5;
+  font-size: 14px;
   padding-top: calc(var(--inset-top) + 12px);
-  padding-bottom: calc(var(--inset-bottom) + 20px);
+  padding-bottom: calc(var(--inset-bottom) + 80px);
   padding-left: calc(var(--inset-left) + 16px);
   padding-right: calc(var(--inset-right) + 16px);
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
   min-height: 100vh;
 }
 
+/* Header */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding-bottom: 8px;
 }
 
 .title-group h1 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--m3e-text-main);
+  letter-spacing: -0.2px;
 }
 
 .title-group p {
   font-size: 12px;
-  color: #8b949e;
+  color: var(--m3e-text-muted);
+  margin-top: 2px;
 }
 
 .badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
-  font-weight: 500;
-  background-color: #2563eb;
-  color: #ffffff;
+  font-weight: 600;
+  background-color: var(--m3e-primary-container);
+  color: var(--m3e-on-primary-container);
 }
 
 .badge.inactive {
-  background-color: #2b3038;
-  color: #8b949e;
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-sub);
 }
 
+/* Tab Navigation */
 .tab-nav {
   display: flex;
-  gap: 8px;
-  background-color: #1a1d22;
-  padding: 4px;
-  border-radius: 8px;
+  gap: 6px;
+  background-color: var(--m3e-surface-card);
+  padding: 6px;
+  border-radius: var(--radius-pill);
   margin-bottom: 16px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 10px;
+  padding: 10px 12px;
   background-color: transparent;
-  color: #8b949e;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 6px;
+  color: var(--m3e-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .tab-btn.active {
-  background-color: #282d35;
-  color: #ffffff;
+  background-color: var(--m3e-surface-highest);
+  color: var(--m3e-text-main);
 }
 
 .tab-pane {
@@ -104,43 +151,71 @@ header {
   display: block;
 }
 
+/* M3E Surface Cards */
 .card {
-  background-color: #1a1d22;
-  border-radius: 8px;
-  padding: 14px;
+  background-color: var(--m3e-surface-card);
+  border-radius: var(--radius-card);
+  padding: 16px;
   margin-bottom: 14px;
 }
 
 .card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--m3e-text-main);
   margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+.card-subtitle {
+  font-size: 12px;
+  color: var(--m3e-text-muted);
+  margin-bottom: 10px;
+}
+
+/* Pill Mode Selector */
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
 .mode-btn {
-  padding: 12px 8px;
-  border-radius: 6px;
-  background-color: #242930;
-  color: #c9d1d9;
+  padding: 12px 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-muted);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.mode-btn.active {
-  background-color: #2563eb;
-  color: #ffffff;
+.mode-btn.active[data-mode="auto"] {
+  background-color: var(--m3e-auto-bg);
+  color: var(--m3e-auto);
+}
+.mode-btn.active[data-mode="powersave"] {
+  background-color: var(--m3e-powersave-bg);
+  color: var(--m3e-powersave);
+}
+.mode-btn.active[data-mode="balance"] {
+  background-color: var(--m3e-balance-bg);
+  color: var(--m3e-balance);
+}
+.mode-btn.active[data-mode="performance"] {
+  background-color: var(--m3e-perf-bg);
+  color: var(--m3e-perf);
+}
+.mode-btn.active[data-mode="fast"] {
+  background-color: var(--m3e-fast-bg);
+  color: var(--m3e-fast);
 }
 
+/* Stats */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -148,107 +223,269 @@ header {
 }
 
 .stat-item {
-  background-color: #242930;
-  padding: 10px 12px;
-  border-radius: 6px;
+  background-color: var(--m3e-surface-block);
+  padding: 12px 14px;
+  border-radius: var(--radius-block);
 }
 
 .stat-label {
   font-size: 11px;
-  color: #8b949e;
+  color: var(--m3e-text-muted);
   margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--m3e-text-main);
   word-break: break-all;
 }
 
 .cpu-freq-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .cpu-freq-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #242930;
-  padding: 8px 12px;
-  border-radius: 6px;
+  background-color: var(--m3e-surface-block);
+  padding: 10px 14px;
+  border-radius: var(--radius-block);
   font-size: 13px;
 }
 
+/* Forms & Inputs */
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .form-label {
   display: block;
   font-size: 12px;
-  color: #8b949e;
+  font-weight: 500;
+  color: var(--m3e-text-muted);
   margin-bottom: 6px;
 }
 
 .form-input, .form-select, .form-textarea {
   width: 100%;
-  padding: 10px 12px;
-  background-color: #242930;
-  color: #ffffff;
-  border-radius: 6px;
+  padding: 12px 14px;
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-main);
+  border-radius: var(--radius-block);
   font-size: 13px;
   font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  background-color: var(--m3e-surface-highest);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 140px;
+  min-height: 120px;
   font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 12px;
   line-height: 1.4;
 }
 
+/* Action Buttons */
 .action-row {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .btn {
-  padding: 10px 16px;
-  border-radius: 6px;
-  background-color: #242930;
-  color: #ffffff;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-main);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   flex: 1;
   text-align: center;
 }
 
 .btn-primary {
-  background-color: #2563eb;
+  background-color: var(--m3e-primary);
+  color: var(--m3e-on-primary);
 }
 
 .btn-secondary {
-  background-color: #2e3440;
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-main);
+}
+
+.btn-danger {
+  background-color: var(--m3e-fast-bg);
+  color: var(--m3e-fast);
 }
 
 .btn:active {
   opacity: 0.85;
 }
 
+/* Message / Toast */
 .message-box {
   display: none;
-  padding: 10px 14px;
-  border-radius: 6px;
-  background-color: #1e3a5f;
-  color: #93c5fd;
+  padding: 12px 16px;
+  border-radius: var(--radius-block);
+  background-color: var(--m3e-primary-container);
+  color: var(--m3e-on-primary-container);
   font-size: 13px;
+  font-weight: 500;
   margin-bottom: 14px;
+}
+
+/* Scene-style Per-App Section */
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chip-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background-color: var(--m3e-surface-block);
+  color: var(--m3e-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filter-chip.active {
+  background-color: var(--m3e-primary-container);
+  color: var(--m3e-on-primary-container);
+}
+
+.app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.app-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--m3e-surface-block);
+  padding: 12px 14px;
+  border-radius: var(--radius-block);
+  gap: 12px;
+  transition: background-color 0.15s ease;
+}
+
+.app-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  background-color: var(--m3e-surface-highest);
+  color: var(--m3e-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.app-avatar.game {
+  background-color: var(--m3e-perf-bg);
+  color: var(--m3e-perf);
+}
+
+.app-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.app-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m3e-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-pkg {
+  font-size: 11px;
+  color: var(--m3e-text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* App Mode Segmented / Selector */
+.app-mode-select {
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  background-color: var(--m3e-surface-card);
+  color: var(--m3e-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.app-mode-select.mode-powersave {
+  background-color: var(--m3e-powersave-bg);
+  color: var(--m3e-powersave);
+}
+.app-mode-select.mode-balance {
+  background-color: var(--m3e-balance-bg);
+  color: var(--m3e-balance);
+}
+.app-mode-select.mode-performance {
+  background-color: var(--m3e-perf-bg);
+  color: var(--m3e-perf);
+}
+.app-mode-select.mode-fast {
+  background-color: var(--m3e-fast-bg);
+  color: var(--m3e-fast);
+}
+
+/* Sticky Bottom Bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--m3e-surface);
+  padding: 12px 16px calc(var(--inset-bottom) + 12px) 16px;
+  display: flex;
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+  z-index: 100;
 }
