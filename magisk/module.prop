@@ -1,8 +1,8 @@
 id=uperf
-name=Uperf Game Turbo
-version=️1.35 based on uperf 904
-versionCode=240424
-author=Matt Yang（吟惋兮改）
-description=❤️欢迎使用Uperf Game Turbo，使用时有问题可反馈至yinwanxi0107@gmail.com❤️///❤️Welcome to use Uperf Game Turbo. If you have any questions, please send feedback to yinwanxi0107@gmail.com❤️
-updateJson=https://github.com/yinwanxi/Uperf-Game-Turbo/raw/master/version.json
+name=Uperf-Re
+version=v1.51
+versionCode=260422
+author=Matt Yang (吟惋兮 & Akari)
+description=用户态性能控制器，搭载 KernelSU 极简 WebUI，支持运行模式调节、硬件数据监控与核心参数自定义。
+updateJson=https://raw.githubusercontent.com/Akiyama-25/Uperf-Re/master/update.json
 ASOPT_VERSIONCODE=260

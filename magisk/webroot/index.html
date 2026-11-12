@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Uperf-Re 控制面板</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="title-group">
+      <h1>Uperf-Re</h1>
+      <p>KernelSU 控制面板</p>
+    </div>
+    <span id="headerModeBadge" class="badge">未知模式</span>
+  </header>
+
+  <div id="msgBox" class="message-box"></div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="tab-monitor">状态与监控</button>
+    <button class="tab-btn" data-tab="tab-config">参数配置</button>
+  </nav>
+
+  <!-- 选项卡 1: 状态与监控 -->
+  <main id="tab-monitor" class="tab-pane active">
+    <!-- 运行模式 -->
+    <section class="card">
+      <div class="card-title">运行模式</div>
+      <div class="mode-grid">
+        <button class="mode-btn" data-mode="auto">自动</button>
+        <button class="mode-btn" data-mode="powersave">省电</button>
+        <button class="mode-btn" data-mode="balance">均衡</button>
+        <button class="mode-btn" data-mode="performance">性能</button>
+        <button class="mode-btn" data-mode="fast">极速</button>
+      </div>
+    </section>
+
+    <!-- 服务状态 -->
+    <section class="card">
+      <div class="card-title">服务状态</div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-label">守护进程</div>
+          <div id="daemonStatus" class="stat-value">检测中...</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">进程 PID</div>
+          <div id="daemonPid" class="stat-value">-</div>
+        </div>
+        <div class="stat-item" style="grid-column: span 2;">
+          <div class="stat-label">顶层前台应用</div>
+          <div id="topApp" class="stat-value">未知</div>
+        </div>
+      </div>
+      <div class="action-row">
+        <button id="btnRefreshStatus" class="btn btn-secondary">刷新状态</button>
+        <button id="btnRestartDaemon" class="btn btn-secondary">重启守护进程</button>
+      </div>
+    </section>
+
+    <!-- 硬件监控 -->
+    <section class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="card-title" style="margin-bottom: 0;">硬件监控</div>
+        <label style="font-size: 12px; color: #8b949e; display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" id="chkAutoRefresh" checked style="accent-color: #2563eb;">
+          自动刷新 (2s)
+        </label>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-label">电池温度</div>
+          <div id="batTemp" class="stat-value">- °C</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">电池电量</div>
+          <div id="batCap" class="stat-value">-%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">充放电状态</div>
+          <div id="batStat" class="stat-value">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">实时电流</div>
+          <div id="batCurr" class="stat-value">- mA</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div class="stat-label">CPU 实时频率</div>
+        <div id="cpuFreqList" class="cpu-freq-list">
+          <div class="cpu-freq-item">
+            <span>读取中...</span>
+            <span>- MHz</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 选项卡 2: 参数配置 -->
+  <main id="tab-config" class="tab-pane">
+    <!-- 分应用配置 -->
+    <section class="card">
+      <div class="card-title">分应用配置 (perapp_powermode.txt)</div>
+      <div class="form-group">
+        <label class="form-label">规则列表 (* 为默认，- 为熄屏)</label>
+        <textarea id="txtPerApp" class="form-textarea" placeholder="包名 模式&#10;com.example.app fast&#10;* balance&#10;- powersave"></textarea>
+      </div>
+      <div class="action-row">
+        <button id="btnReloadPerApp" class="btn btn-secondary">重新载入</button>
+        <button id="btnSavePerApp" class="btn btn-primary">保存规则</button>
+      </div>
+    </section>
+
+    <!-- 关键调优参数 -->
+    <section class="card">
+      <div class="card-title">核心参数调节 (uperf.json)</div>
+      <div class="form-group">
+        <label class="form-label">长期功耗限制 (slowLimitPower, W)</label>
+        <input type="number" step="0.5" id="cfgSlowLimitPower" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">短期爆发功耗 (fastLimitPower, W)</label>
+        <input type="number" step="0.5" id="cfgFastLimitPower" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">性能留存余量 (margin, 0.0~1.0)</label>
+        <input type="number" step="0.05" min="0" max="1" id="cfgMargin" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">突发爆发余量 (burst, 0.0~1.0)</label>
+        <input type="number" step="0.05" min="0" max="1" id="cfgBurst" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">基础采样周期 (baseSampleTime, 秒)</label>
+        <input type="number" step="0.005" min="0.005" max="0.5" id="cfgBaseSampleTime" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">滑动判定阈值 (swipeThd, 0.01~0.5)</label>
+        <input type="number" step="0.01" min="0.01" max="0.5" id="cfgSwipeThd" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">日志输出等级 (log.level)</label>
+        <select id="cfgLogLevel" class="form-select">
+          <option value="err">err (仅错误)</option>
+          <option value="warn">warn (警告)</option>
+          <option value="info">info (常规信息)</option>
+          <option value="debug">debug (调试)</option>
+          <option value="trace">trace (详细跟踪)</option>
+        </select>
+      </div>
+      <div class="action-row">
+        <button id="btnReloadParams" class="btn btn-secondary">载入配置</button>
+        <button id="btnSaveParams" class="btn btn-primary">保存参数并应用</button>
+      </div>
+    </section>
+
+    <!-- 高级配置编辑 -->
+    <section class="card">
+      <div class="card-title">高级 JSON 完整配置</div>
+      <div class="form-group">
+        <textarea id="txtRawJson" class="form-textarea" style="min-height: 200px;" placeholder="uperf.json 完整内容"></textarea>
+      </div>
+      <div class="action-row">
+        <button id="btnReloadRawJson" class="btn btn-secondary">重载 JSON</button>
+        <button id="btnSaveRawJson" class="btn btn-primary">保存完整 JSON</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

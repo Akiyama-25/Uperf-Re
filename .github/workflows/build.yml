@@ -1,0 +1,40 @@
+name: Build & Package Uperf-Re
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Package KernelSU Module
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate scripts and configuration
+        run: |
+          chmod +x build.sh
+          bash build.sh --test
+
+      - name: Prepare module package
+        run: |
+          bash build.sh --package
+
+      - name: Extract module version
+        id: mod_version
+        run: |
+          VER=$(grep -E '^version=' module.prop | cut -d'=' -f2 | tr -d ' \r\n')
+          echo "version=${VER:-v1.51}" >> $GITHUB_OUTPUT
+
+      - name: Upload flashable module zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Uperf-Re-${{ steps.mod_version.outputs.version }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error

@@ -1,0 +1,129 @@
+name: Release Uperf-Re
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: '发布版本标签 (例如 v1.51，留空则自动读取 module.prop 中的 version)'
+        required: false
+        default: ''
+      release_title:
+        description: 'Release 标题 (留空则默认为 "Uperf-Re <版本号>")'
+        required: false
+        default: ''
+      release_notes:
+        description: '版本更新说明与日志'
+        required: false
+        default: 'Uperf-Re 最新版本发布'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version tag and release title
+        id: get_version
+        run: |
+          RAW_TAG="${{ github.event.inputs.tag_name }}"
+          RAW_TITLE="${{ github.event.inputs.release_title }}"
+          PROP_VER=$(grep -E '^version=' module.prop | cut -d'=' -f2 | tr -d ' \r\n')
+          PROP_VER=${PROP_VER:-"v1.51"}
+
+          # 规范化并清洗 Git Tag
+          if [ -n "$RAW_TAG" ]; then
+            EXTRACTED=$(echo "$RAW_TAG" | grep -oE 'v?[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.]+)?' | head -n1)
+            if [ -n "$EXTRACTED" ]; then
+              if [[ "$EXTRACTED" =~ ^[0-9] ]]; then
+                CLEAN_TAG="v${EXTRACTED}"
+              else
+                CLEAN_TAG="${EXTRACTED}"
+              fi
+            else
+              CLEAN_TAG=$(echo "$RAW_TAG" | tr -s ' ' '-' | tr -cd 'a-zA-Z0-9._-')
+            fi
+          else
+            CLEAN_TAG="${PROP_VER}"
+          fi
+
+          if [ -z "$CLEAN_TAG" ] || ! git check-ref-format --allow-onelevel "refs/tags/${CLEAN_TAG}" 2>/dev/null; then
+            CLEAN_TAG="${PROP_VER}"
+          fi
+
+          # 规范化 Release Title
+          if [ -n "$RAW_TITLE" ]; then
+            TITLE="$RAW_TITLE"
+          elif [ -n "$RAW_TAG" ] && [ "$RAW_TAG" != "$CLEAN_TAG" ]; then
+            TITLE="$RAW_TAG"
+          else
+            TITLE="Uperf-Re ${CLEAN_TAG}"
+          fi
+
+          # 确保 module.prop 中 version 与 tag 一致
+          sed -i -E "s/^version=.*/version=${CLEAN_TAG}/" module.prop
+          [ -f magisk/module.prop ] && sed -i -E "s/^version=.*/version=${CLEAN_TAG}/" magisk/module.prop
+
+          echo "tag=${CLEAN_TAG}" >> $GITHUB_OUTPUT
+          echo "title=${TITLE}" >> $GITHUB_OUTPUT
+          echo ">>> Resolved Git Tag: ${CLEAN_TAG}"
+          echo ">>> Resolved Release Title: ${TITLE}"
+
+      - name: Validate scripts and configuration
+        run: |
+          chmod +x build.sh
+          bash build.sh --test
+
+      - name: Package flashable zip
+        run: |
+          bash build.sh --package
+
+      - name: Update update.json and version.json
+        run: |
+          TAG="${{ steps.get_version.outputs.tag }}"
+          VER_CODE=$(grep -E '^versionCode=' module.prop | cut -d'=' -f2 | tr -d ' \r\n')
+          cat <<EOF > update.json
+          {
+            "version": "${TAG}",
+            "versionCode": ${VER_CODE:-260422},
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${TAG}/Uperf-Re-${TAG}.zip",
+            "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/master/changelog.md"
+          }
+          EOF
+          cp update.json magisk/update.json
+          cat <<EOF > version.json
+          {
+            "version": "${TAG#v}",
+            "versionCode": ${VER_CODE:-260422},
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${TAG}/Uperf-Re-${TAG}.zip",
+            "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/master/changelog.md"
+          }
+          EOF
+          cp version.json magisk/version.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add update.json magisk/update.json version.json magisk/version.json module.prop magisk/module.prop
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): bump update.json, version.json and module.prop for ${TAG} [skip ci]"
+            git push origin master || true
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: ${{ steps.get_version.outputs.title }}
+          body: ${{ github.event.inputs.release_notes }}
+          files: |
+            dist/*.zip
+            dist/*.sha256
+          draft: false
+          prerelease: false
+          generate_release_notes: true
